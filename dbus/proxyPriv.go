@@ -54,7 +54,7 @@ type proxyPrv struct {
 	// cgroup controller
 	controller *newCGroups.Controller
 
-	// iptables chain rule slice[2]
+	// iptables chain rule slice[3]
 	chains [2]*newIptables.Chain
 
 	// route rule
@@ -62,6 +62,8 @@ type proxyPrv struct {
 
 	// handler manager
 	handlerMgr *tProxy.HandlerMgr
+
+	dnsProxy *proxyDNS
 
 	// handler
 	uid uint32
@@ -72,8 +74,8 @@ type proxyPrv struct {
 }
 
 // init proxy private
-func initProxyPrv(scope define.Scope, priority define.Priority) proxyPrv {
-	prv := proxyPrv{
+func initProxyPrv(scope define.Scope, priority define.Priority) *proxyPrv {
+	prv := &proxyPrv{
 		scope:      scope,
 		priority:   priority,
 		handlerMgr: tProxy.NewHandlerMgr(scope),
@@ -84,6 +86,8 @@ func initProxyPrv(scope define.Scope, priority define.Priority) proxyPrv {
 			WhiteList:    []string{},
 		},
 	}
+
+	prv.dnsProxy = newProxyDNS(prv)
 	return prv
 }
 

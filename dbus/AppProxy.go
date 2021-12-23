@@ -11,18 +11,18 @@ import (
 )
 
 type AppProxy struct {
-	proxyPrv
+	*proxyPrv
 
 	// methods
 	methods *struct {
-		ClearProxy    func()
-		SetProxies    func() `in:"proxies" out:"err"`
-		StartProxy    func() `in:"proto,name,udp" out:"err"`
-		StopProxy     func()
-		GetProxy      func() `out:"proxy"`
-		AddProxy      func() `in:"proto,name,proxy"`
-		GetCGroups    func() `out:"cgroups"`
-		AddProc       func() `in:"pid" out:"success"`
+		ClearProxy func()
+		SetProxies func() `in:"proxies" out:"err"`
+		StartProxy func() `in:"proto,name,udp" out:"err"`
+		StopProxy  func()
+		GetProxy   func() `out:"proxy"`
+		AddProxy   func() `in:"proto,name,proxy"`
+		GetCGroups func() `out:"cgroups"`
+		AddProc    func() `in:"pid" out:"success"`
 
 		// diff method
 		AddProxyApps func() `in:"app" out:"err"`

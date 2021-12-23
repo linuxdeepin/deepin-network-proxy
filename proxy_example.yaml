@@ -50,6 +50,8 @@ all-proxies:
     - baidu.com
     - si.com
     t-port: 8090
+    use-fake-ip: true
+    dns-port: 5353
   Global:
     proxies:
       http:
@@ -101,3 +103,5 @@ all-proxies:
     - baidu.com
     - si.com
     t-port: 8080
+    use-fake-ip: true
+    dns-port: 5253

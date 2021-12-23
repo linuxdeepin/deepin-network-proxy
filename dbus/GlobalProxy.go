@@ -11,7 +11,7 @@ import (
 )
 
 type GlobalProxy struct {
-	proxyPrv
+	*proxyPrv
 
 	// no proxy app
 	IgnoreApp []string
