@@ -25,7 +25,7 @@ prepare:
 
 Out/%:  prepare
 	@echo $(GOPATH)
-	GOPATH="${CURDIR}/${GOPATH_DIR}:$(GOPATH)" ${GOBUILD} -o bin/${@F} ${GOPKG_PREFIX}/out/${@F}
+	GOPATH="${CURDIR}/${GOPATH_DIR}:$(GOPATH)" ${GOBUILD} -o bin/${@F} ${GOBUILD_OPTIONS} ${GOPKG_PREFIX}/out/${@F}
 
 install:
 	mkdir -p ${DESTDIR}${PREFIXETC}/${DEEPIN}/${PROXYFILE}
