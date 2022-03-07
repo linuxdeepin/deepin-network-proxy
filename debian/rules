@@ -16,7 +16,7 @@ export GOPATH := /usr/share/gocode
 export GOCACHE=/tmp/
 
 ifneq ($(DEB_BUILD_ARCH), mips64el)
-	export GOBUILD_OPTIONS=-ldflags "-w -s" -buildmode=pie
+	export GOBUILD_OPTIONS=-ldflags '-linkmode=external -extldflags "-pie"'
 endif
 
 %:
