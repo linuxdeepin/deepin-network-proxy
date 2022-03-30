@@ -387,6 +387,5 @@ func CreateProcsService() error {
 }
 
 func init() {
-	logger = log.NewLogger("system/proc")
-	logger.SetLogLevel(log.LevelDebug)
+	logger = log.NewLogger("proxy/netlink")
 }

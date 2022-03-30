@@ -472,6 +472,5 @@ func (m *Manager) firstAdjustCGroups() error {
 }
 
 func init() {
-	logger = log.NewLogger("daemon/iptables")
-	logger.SetLogLevel(log.LevelDebug)
+	logger = log.NewLogger("proxy/dbus")
 }

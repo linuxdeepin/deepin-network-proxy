@@ -5,7 +5,6 @@ import (
 	define "github.com/ArisAachen/deepin-network-proxy/define"
 	"github.com/godbus/dbus"
 	"github.com/linuxdeepin/go-lib/dbusutil"
-	"github.com/linuxdeepin/go-lib/log"
 )
 
 // https://www.kernel.org/doc/Documentation/networking/tproxy.txt
@@ -56,7 +55,4 @@ func newProxy(scope define.Scope) BaseProxy {
 	}
 }
 
-func init() {
-	logger = log.NewLogger("daemon/proxy")
-	logger.SetLogLevel(log.LevelInfo)
-}
+func init() {}

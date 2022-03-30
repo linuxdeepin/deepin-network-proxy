@@ -32,6 +32,5 @@ func (m *Manager) CreateRoute(name string, node RouteNodeSpec, info RouteInfoSpe
 }
 
 func init() {
-	logger = log.NewLogger("damon/route")
-	logger.SetLogLevel(log.LevelInfo)
+	logger = log.NewLogger("proxy/iproute")
 }
