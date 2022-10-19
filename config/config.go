@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	Com "github.com/ArisAachen/deepin-network-proxy/com"
-	define "github.com/ArisAachen/deepin-network-proxy/define"
+	Com "github.com/linuxdeepin/deepin-network-proxy/com"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
 	"gopkg.in/yaml.v2"
 )
 

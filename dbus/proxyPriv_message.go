@@ -1,8 +1,8 @@
 package DBus
 
 import (
-	define "github.com/ArisAachen/deepin-network-proxy/define"
 	"github.com/godbus/dbus"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
 )
 
 // scope

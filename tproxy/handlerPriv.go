@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	config "github.com/ArisAachen/deepin-network-proxy/config"
-	define "github.com/ArisAachen/deepin-network-proxy/define"
+	config "github.com/linuxdeepin/deepin-network-proxy/config"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
 )
 
 // handler private, data of handler

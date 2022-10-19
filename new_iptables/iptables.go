@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	com "github.com/ArisAachen/deepin-network-proxy/com"
+	com "github.com/linuxdeepin/deepin-network-proxy/com"
 )
 
 // tables

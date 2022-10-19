@@ -3,10 +3,10 @@ package DBus
 import (
 	"fmt"
 
-	com "github.com/ArisAachen/deepin-network-proxy/com"
-	config "github.com/ArisAachen/deepin-network-proxy/config"
-	define "github.com/ArisAachen/deepin-network-proxy/define"
 	"github.com/godbus/dbus"
+	com "github.com/linuxdeepin/deepin-network-proxy/com"
+	config "github.com/linuxdeepin/deepin-network-proxy/config"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
 	"github.com/linuxdeepin/go-lib/dbusutil"
 )
 

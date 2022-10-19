@@ -1,7 +1,7 @@
 package main
 
 import (
-	proxyDBus "github.com/ArisAachen/deepin-network-proxy/dbus"
+	proxyDBus "github.com/linuxdeepin/deepin-network-proxy/dbus"
 	"github.com/linuxdeepin/go-lib/log"
 )
 

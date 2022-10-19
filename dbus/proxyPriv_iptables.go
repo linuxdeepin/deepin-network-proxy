@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 
-	define "github.com/ArisAachen/deepin-network-proxy/define"
-	newIptables "github.com/ArisAachen/deepin-network-proxy/new_iptables"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
+	newIptables "github.com/linuxdeepin/deepin-network-proxy/new_iptables"
 )
 
 // create tables

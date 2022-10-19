@@ -2,9 +2,10 @@ package NewCGroups
 
 import (
 	"errors"
-	com "github.com/ArisAachen/deepin-network-proxy/com"
 	"os/exec"
 	"strings"
+
+	com "github.com/linuxdeepin/deepin-network-proxy/com"
 )
 
 // Attach pid to cgroups path

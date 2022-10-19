@@ -4,8 +4,8 @@ import (
 	"errors"
 	"sort"
 
-	com "github.com/ArisAachen/deepin-network-proxy/com"
-	define "github.com/ArisAachen/deepin-network-proxy/define"
+	com "github.com/linuxdeepin/deepin-network-proxy/com"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
 	"github.com/linuxdeepin/go-lib/log"
 )
 

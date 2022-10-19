@@ -11,11 +11,11 @@ import (
 	"strings"
 	"syscall"
 
-	com "github.com/ArisAachen/deepin-network-proxy/com"
-	config "github.com/ArisAachen/deepin-network-proxy/config"
-	newCGroups "github.com/ArisAachen/deepin-network-proxy/new_cgroups"
-	tProxy "github.com/ArisAachen/deepin-network-proxy/tproxy"
 	"github.com/godbus/dbus"
+	com "github.com/linuxdeepin/deepin-network-proxy/com"
+	config "github.com/linuxdeepin/deepin-network-proxy/config"
+	newCGroups "github.com/linuxdeepin/deepin-network-proxy/new_cgroups"
+	tProxy "github.com/linuxdeepin/deepin-network-proxy/tproxy"
 	"github.com/linuxdeepin/go-lib/dbusutil"
 )
 

@@ -7,9 +7,9 @@ import (
 	"io"
 	"net"
 
-	com "github.com/ArisAachen/deepin-network-proxy/com"
-	config "github.com/ArisAachen/deepin-network-proxy/config"
-	define "github.com/ArisAachen/deepin-network-proxy/define"
+	com "github.com/linuxdeepin/deepin-network-proxy/com"
+	config "github.com/linuxdeepin/deepin-network-proxy/config"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
 )
 
 type UdpSock5Handler struct {

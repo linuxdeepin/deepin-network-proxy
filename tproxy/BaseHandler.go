@@ -5,8 +5,8 @@ import (
 	"net"
 	"sync"
 
-	config "github.com/ArisAachen/deepin-network-proxy/config"
-	define "github.com/ArisAachen/deepin-network-proxy/define"
+	config "github.com/linuxdeepin/deepin-network-proxy/config"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
 	"github.com/linuxdeepin/go-lib/log"
 )
 

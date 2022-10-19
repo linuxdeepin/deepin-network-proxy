@@ -1,7 +1,7 @@
 package DBus
 
 import (
-	define "github.com/ArisAachen/deepin-network-proxy/define"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
 )
 
 func (mgr *proxyPrv) getCGroupPriority() define.Priority {
