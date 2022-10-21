@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 
 	config "github.com/linuxdeepin/deepin-network-proxy/config"
@@ -17,7 +18,7 @@ type TcpSock5Handler struct {
 func NewTcpSock5Handler(scope define.Scope, key HandlerKey, proxy config.Proxy, lAddr net.Addr, rAddr net.Addr, lConn net.Conn) *TcpSock5Handler {
 	// create new handler
 	handler := &TcpSock5Handler{
-		handlerPrv: createHandlerPrv(SOCK5TCP, scope, key, proxy, lAddr, rAddr, lConn),
+		handlerPrv: createHandlerPrv(SOCKS5TCP, scope, key, proxy, lAddr, rAddr, lConn),
 	}
 	// add self to private parent
 	handler.saveParent(handler)
@@ -33,8 +34,17 @@ func (handler *TcpSock5Handler) Tunnel() error {
 		return err
 	}
 	// check type
-	tcpAddr, ok := handler.rAddr.(*net.TCPAddr)
-	if !ok {
+	var port uint16
+	var ip net.IP
+	dominname := ""
+	switch addr := handler.rAddr.(type) {
+	case *net.TCPAddr:
+		ip = addr.IP
+	case *DomainAddr:
+		port = uint16(addr.Port)
+		ip = net.IPv4(0x00, 0x00, 0x00, 0x01)
+		dominname = addr.Domain
+	default:
 		logger.Warningf("[%s] tunnel addr type is not tcp", handler.typ)
 		return errors.New("type is not tcp")
 	}
@@ -134,24 +144,31 @@ func (handler *TcpSock5Handler) Tunnel() error {
 	buf[1] = 1 // connect
 	buf[2] = 0 // reserved
 	// add tcpAddr
-	if tcpAddr.IP.To4() != nil {
-		buf[3] = 1
-		buf = append(buf, tcpAddr.IP.To4()...)
-	} else if tcpAddr.IP.To16() != nil {
-		buf[3] = 4
-		buf = append(buf, tcpAddr.IP.To16()...)
+	if dominname == "" {
+		if len(ip) == net.IPv4len && ip.To4() != nil {
+			buf[3] = 1
+			buf = append(buf, ip.To4()...)
+		} else if ip.To16() != nil {
+			buf[3] = 4
+			buf = append(buf, ip.To16()...)
+		} else {
+			return errors.New("ip invalid")
+		}
 	} else {
+		if len(dominname) > 255 {
+			return errors.New("domain name out of max length")
+		}
 		buf[3] = 3
-		buf = append(buf, tcpAddr.IP...)
+		buf = append(buf, byte(len(dominname)))
+		buf = append(buf, []byte(dominname)...)
 	}
 	// convert port 2 byte
-	portU := uint16(tcpAddr.Port)
-	if portU == 0 {
-		portU = 80
+	if port == 0 {
+		port = 80
 	}
-	port := make([]byte, 2)
-	binary.BigEndian.PutUint16(port, portU)
-	buf = append(buf, port...)
+	portByte := make([]byte, 2)
+	binary.BigEndian.PutUint16(portByte, port)
+	buf = append(buf, portByte...)
 	// request proxy connect rConn server
 	logger.Debugf("[%s] send connect request, buf: %v", handler.typ, buf)
 	_, err = rConn.Write(buf)
@@ -160,17 +177,61 @@ func (handler *TcpSock5Handler) Tunnel() error {
 		return err
 	}
 	logger.Debugf("[%s] request successfully", handler.typ)
-	buf = make([]byte, 16)
-	_, err = rConn.Read(buf)
+
+	// resp
+	// VER REP RSV
+	_, err = io.ReadFull(rConn, buf[0:3])
 	if err != nil {
 		logger.Warningf("[%s] connect response failed, err: %v", handler.typ, err)
 		return err
 	}
-	logger.Debugf("[%s] response successfully, buf: %v", handler.typ, buf)
 	if buf[0] != 5 || buf[1] != 0 {
 		logger.Warningf("[%s] connect response failed, version: %v, code: %v", handler.typ, buf[0], buf[1])
 		return fmt.Errorf("incorrect sock5 connect reponse, version: %v, code: %v", buf[0], buf[1])
 	}
+
+	// ATYPE
+	_, err = io.ReadFull(rConn, buf[0:1])
+	if err != nil {
+		logger.Warningf("[%s] connect response failed, err: %v", handler.typ, err)
+		return err
+	}
+
+	// IP
+	var addrLen int
+	switch buf[0] {
+	case 1:
+		addrLen = 4
+	case 4:
+		addrLen = 16
+	case 3:
+		_, err = io.ReadFull(rConn, buf[0:1])
+		if err != nil {
+			logger.Warningf("[%s] connect response failed, err: %v", handler.typ, err)
+			return err
+		}
+		addrLen = int(buf[0])
+	default:
+		return errors.New("invalid ip")
+	}
+
+	if len(buf) < addrLen {
+		buf = make([]byte, addrLen)
+	}
+
+	_, err = io.ReadFull(rConn, buf[0:addrLen])
+	if err != nil {
+		logger.Warningf("[%s] connect response failed, err: %v", handler.typ, err)
+		return err
+	}
+
+	// PORT
+	_, err = io.ReadFull(rConn, buf[0:2])
+	if err != nil {
+		logger.Warningf("[%s] connect response failed, err: %v", handler.typ, err)
+		return err
+	}
+
 	logger.Debugf("[%s] proxy: tunnel create success, [%s] -> [%s] -> [%s]",
 		handler.typ, handler.lAddr.String(), rConn.RemoteAddr(), handler.rAddr.String())
 	// save rConn handler

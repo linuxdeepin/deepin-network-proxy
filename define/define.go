@@ -55,7 +55,6 @@ const (
 	GlobalPriority
 )
 
-
 const (
 	ConfigName = "proxy.yaml"
 	ScriptName = "clean_script.sh"

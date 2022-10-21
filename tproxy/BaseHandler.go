@@ -37,9 +37,9 @@ type ProtoTyp string
 const (
 	NoneProto ProtoTyp = "no-proto"
 	HTTP      ProtoTyp = "http"
-	SOCK4     ProtoTyp = "sock4"
-	SOCK5TCP  ProtoTyp = "sock5-tcp"
-	SOCK5UDP  ProtoTyp = "sock5-udp"
+	SOCKS4    ProtoTyp = "socks4"
+	SOCKS5TCP ProtoTyp = "socks5-tcp"
+	SOCKS5UDP ProtoTyp = "socks5-udp"
 )
 
 func BuildProto(proto string) (ProtoTyp, error) {
@@ -48,12 +48,12 @@ func BuildProto(proto string) (ProtoTyp, error) {
 		return NoneProto, nil
 	case "http":
 		return HTTP, nil
-	case "sock4":
-		return SOCK4, nil
-	case "sock5-tcp":
-		return SOCK5TCP, nil
-	case "sock5-udp":
-		return SOCK5UDP, nil
+	case "socks4":
+		return SOCKS4, nil
+	case "socks5-tcp":
+		return SOCKS5TCP, nil
+	case "socks5-udp":
+		return SOCKS5UDP, nil
 	default:
 		return NoneProto, fmt.Errorf("scope is invalid, scope: %v", proto)
 	}
@@ -65,12 +65,12 @@ func (Typ ProtoTyp) String() string {
 		return "no-proxy"
 	case HTTP:
 		return "http"
-	case SOCK4:
-		return "sock4"
-	case SOCK5TCP:
-		return "sock5-tcp"
-	case SOCK5UDP:
-		return "sock5-udp"
+	case SOCKS4:
+		return "socks4"
+	case SOCKS5TCP:
+		return "socks5-tcp"
+	case SOCKS5UDP:
+		return "socks5-udp"
 	default:
 		return "unknown-proto"
 	}
@@ -184,11 +184,11 @@ func NewHandler(proto ProtoTyp, scope define.Scope, key HandlerKey, proxy config
 	switch proto {
 	case HTTP:
 		return NewHttpHandler(scope, key, proxy, lAddr, rAddr, lConn)
-	case SOCK4:
+	case SOCKS4:
 		return NewSock4Handler(scope, key, proxy, lAddr, rAddr, lConn)
-	case SOCK5TCP:
+	case SOCKS5TCP:
 		return NewTcpSock5Handler(scope, key, proxy, lAddr, rAddr, lConn)
-	case SOCK5UDP:
+	case SOCKS5UDP:
 		return NewUdpSock5Handler(scope, key, proxy, lAddr, rAddr, lConn)
 	default:
 		logger.Warningf("unknown proto type: %v", proto)
