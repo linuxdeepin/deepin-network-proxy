@@ -11,6 +11,9 @@ clear_app_iptables(){
 
     ## del mark rule from output chain
     iptables -t mangle -D PREROUTING -j TPROXY -p tcp --on-port 8090 -m mark --mark 8090
+
+    ## del nat rule
+    iptables -t nat -D OUTPUT -j REDIRECT -p udp --dport 53 --to-ports 5353 -m cgroup --path App.slice
 }
 
 ## clear app ip rule
@@ -35,7 +38,7 @@ clear_global_iptables(){
     iptables -t mangle -X Global
 
     ## del mark rule from output chain
-    iptables -t mangle -D PREROUTING -j TPROXY -p tcp --on-port 8080 -m mark --mark 8080 
+    iptables -t mangle -D PREROUTING -j TPROXY -p tcp --on-port 8080 -m mark --mark 8080
 }
 
 ## clear global ip rule
@@ -66,7 +69,7 @@ clear_main_route(){
     ip route del local default dev lo table 100
 }
 
-## clear main 
+## clear main
 clear_main(){
     clear_main_iptables
     clear_main_route
