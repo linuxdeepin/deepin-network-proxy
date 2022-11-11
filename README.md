@@ -1,16 +1,17 @@
 # Introduction
-提供了整套的代理解决方案，并提供了扩展性服务。
+It provides a complete set of agent solutions and provides extensibility services.
+
 
 ## Module
 
 1. NetLink
-用于监听当前运行的所有进程，并列出运行的pid，运行路径和CGroup v2的所属路径。
+Used to monitor all currently running processes, and list the running pid, running path and the path to which CGroup v2 belongs.
 
 2. CGroup
-用于对应用进行分类管理，可控制应用使用系统资源。
+It is used to classify and manage applications and control the use of system resources by applications.
 
 3. TProxy
-用于系统和应用的透明代理，自定义代理规则。
+Transparent proxy for systems and applications, custom proxy rules.
 
 4. IPtables
-用于指定防火墙，网络转发和透明代理。
+Used to specify firewalls, network forwarding and transparent proxies.
