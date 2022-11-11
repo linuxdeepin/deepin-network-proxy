@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package DBus
 
 import (
@@ -11,11 +15,11 @@ import (
 	"strings"
 	"syscall"
 
-	com "github.com/ArisAachen/deepin-network-proxy/com"
-	config "github.com/ArisAachen/deepin-network-proxy/config"
-	newCGroups "github.com/ArisAachen/deepin-network-proxy/new_cgroups"
-	tProxy "github.com/ArisAachen/deepin-network-proxy/tproxy"
 	"github.com/godbus/dbus"
+	com "github.com/linuxdeepin/deepin-network-proxy/com"
+	config "github.com/linuxdeepin/deepin-network-proxy/config"
+	newCGroups "github.com/linuxdeepin/deepin-network-proxy/new_cgroups"
+	tProxy "github.com/linuxdeepin/deepin-network-proxy/tproxy"
 	"github.com/linuxdeepin/go-lib/dbusutil"
 )
 
@@ -73,7 +77,7 @@ func (mgr *proxyPrv) StartProxy(sender dbus.Sender, proto string, name string, u
 	var proxyTyp tProxy.ProtoTyp
 	if proto == "socks5" {
 		// never err
-		proxyTyp = tProxy.SOCK5TCP
+		proxyTyp = tProxy.SOCKS5TCP
 	} else {
 		proxyTyp, err = tProxy.BuildProto(proto)
 		if err != nil {
@@ -378,28 +382,6 @@ func (mgr *proxyPrv) readMsgUDP(proxyTyp tProxy.ProtoTyp, proxy config.Proxy, li
 	mgr.handlerMgr.CloseTypHandler(proxyTyp)
 }
 
-type DomainAddr struct {
-	network string
-	Domain  string
-	Port    int
-}
-
-func newDomainAddr(network string, domain string, port int) *DomainAddr {
-	return &DomainAddr{
-		network: network,
-		Domain:  domain,
-		Port:    port,
-	}
-}
-
-func (a *DomainAddr) Network() string {
-	return a.network
-}
-
-func (a *DomainAddr) String() string {
-	return a.Domain + ":" + strconv.Itoa(a.Port)
-}
-
 // for t-proxy
 func (mgr *proxyPrv) proxyTcp(proxyTyp tProxy.ProtoTyp, proxy config.Proxy, lConn net.Conn) {
 	// request is redirect by t-proxy, output -> pre-routing
@@ -409,19 +391,17 @@ func (mgr *proxyPrv) proxyTcp(proxyTyp tProxy.ProtoTyp, proxy config.Proxy, lCon
 	rAddr := lConn.LocalAddr()
 
 	realRAddr := rAddr
-	if proxyTyp == tProxy.HTTP {
-		switch addr := rAddr.(type) {
-		case *net.UDPAddr:
-			domain, ok := mgr.dnsProxy.getDomainFromFakeIP(addr.IP)
-			if ok {
-				realRAddr = newDomainAddr("udp", domain, addr.Port)
-			}
+	switch addr := rAddr.(type) {
+	case *net.UDPAddr:
+		domain, ok := mgr.dnsProxy.getDomainFromFakeIP(addr.IP)
+		if ok {
+			realRAddr = tProxy.NewDomainAddr("udp", domain, addr.Port)
+		}
 
-		case *net.TCPAddr:
-			domain, ok := mgr.dnsProxy.getDomainFromFakeIP(addr.IP)
-			if ok {
-				realRAddr = newDomainAddr("tcp", domain, addr.Port)
-			}
+	case *net.TCPAddr:
+		domain, ok := mgr.dnsProxy.getDomainFromFakeIP(addr.IP)
+		if ok {
+			realRAddr = tProxy.NewDomainAddr("tcp", domain, addr.Port)
 		}
 	}
 
@@ -462,11 +442,11 @@ func (mgr *proxyPrv) proxyUdp(proxy config.Proxy, lAddr net.Addr, rAddr net.Addr
 		DstAddr: rAddr.String(),
 	}
 	// create new handler
-	handler := tProxy.NewHandler(tProxy.SOCK5UDP, mgr.scope, key, proxy, lAddr, rAddr, lConn)
+	handler := tProxy.NewHandler(tProxy.SOCKS5UDP, mgr.scope, key, proxy, lAddr, rAddr, lConn)
 	// create tunnel between proxy server and dst server
 	err = handler.Tunnel()
 	if err != nil {
-		logger.Warningf("[%s] create tunnel failed, err: %v", tProxy.SOCK5UDP, err)
+		logger.Warningf("[%s] create tunnel failed, err: %v", tProxy.SOCKS5UDP, err)
 		handler.Close()
 		return
 	}

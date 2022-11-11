@@ -1,10 +1,15 @@
+// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package NewCGroups
 
 import (
 	"errors"
-	com "github.com/ArisAachen/deepin-network-proxy/com"
 	"os/exec"
 	"strings"
+
+	com "github.com/linuxdeepin/deepin-network-proxy/com"
 )
 
 // Attach pid to cgroups path

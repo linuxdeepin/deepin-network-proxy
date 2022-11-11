@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package TProxy
 
 import (
@@ -6,10 +10,11 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strconv"
 
-	com "github.com/ArisAachen/deepin-network-proxy/com"
-	config "github.com/ArisAachen/deepin-network-proxy/config"
-	define "github.com/ArisAachen/deepin-network-proxy/define"
+	com "github.com/linuxdeepin/deepin-network-proxy/com"
+	config "github.com/linuxdeepin/deepin-network-proxy/config"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
 )
 
 type UdpSock5Handler struct {
@@ -20,7 +25,7 @@ type UdpSock5Handler struct {
 func NewUdpSock5Handler(scope define.Scope, key HandlerKey, proxy config.Proxy, lAddr net.Addr, rAddr net.Addr, lConn net.Conn) *UdpSock5Handler {
 	// create new handler
 	handler := &UdpSock5Handler{
-		handlerPrv: createHandlerPrv(SOCK5UDP, scope, key, proxy, lAddr, rAddr, lConn),
+		handlerPrv: createHandlerPrv(SOCKS5UDP, scope, key, proxy, lAddr, rAddr, lConn),
 	}
 	// add self to private parent
 	handler.saveParent(handler)
@@ -104,11 +109,21 @@ func (handler *UdpSock5Handler) Tunnel() error {
 	// save tcp connection
 	handler.rTcpConn = rTcpConn
 	// check type
-	udpAddr, ok := handler.rAddr.(*net.UDPAddr)
-	if !ok {
+	var port uint16
+	var ip net.IP
+	dominname := ""
+	switch addr := handler.rAddr.(type) {
+	case *net.TCPAddr:
+		ip = addr.IP
+	case *DomainAddr:
+		port = uint16(addr.Port)
+		ip = net.IPv4(0x00, 0x00, 0x00, 0x01)
+		dominname = addr.Domain
+	default:
 		logger.Warning("[udp] tunnel addr type is not udp")
 		return errors.New("type is not udp")
 	}
+
 	// auth message
 	auth := auth{
 		user:     handler.proxy.UserName,
@@ -204,24 +219,31 @@ func (handler *UdpSock5Handler) Tunnel() error {
 	buf[1] = 3 // udp
 	buf[2] = 0 // reserved
 	// add addr
-	if udpAddr.IP.To4() != nil {
-		buf[3] = 1
-		buf = append(buf, net.IP{127, 0, 0, 0}...)
-	} else if udpAddr.IP.To16() != nil {
-		buf[3] = 4
-		buf = append(buf, udpAddr.IP.To16()...)
+	if dominname == "" {
+		if len(ip) == net.IPv4len && ip.To4() != nil {
+			buf[3] = 1
+			buf = append(buf, ip.To4()...)
+		} else if ip.To16() != nil {
+			buf[3] = 4
+			buf = append(buf, ip.To16()...)
+		} else {
+			return errors.New("ip invalid")
+		}
 	} else {
+		if len(dominname) > 255 {
+			return errors.New("domain name out of max length")
+		}
 		buf[3] = 3
-		buf = append(buf, udpAddr.IP...)
+		buf = append(buf, byte(len(dominname)))
+		buf = append(buf, []byte(dominname)...)
 	}
 	// convert port 2 byte
-	portU := uint16(udpAddr.Port)
-	if portU == 0 {
-		portU = 80
+	if port == 0 {
+		port = 80
 	}
-	port := make([]byte, 2)
-	binary.BigEndian.PutUint16(port, portU)
-	buf = append(buf, port...)
+	portByte := make([]byte, 2)
+	binary.BigEndian.PutUint16(portByte, port)
+	buf = append(buf, portByte...)
 	// request proxy connect rTcpConn server
 	logger.Debugf("[udp] sock5 send connect request, buf: %v", buf)
 	_, err = rTcpConn.Write(buf)
@@ -230,22 +252,76 @@ func (handler *UdpSock5Handler) Tunnel() error {
 		return err
 	}
 	logger.Debugf("[udp] sock5 request successfully")
-	buf = make([]byte, 16)
-	_, err = rTcpConn.Read(buf)
+
+	// resp
+	// VER REP RSV
+	_, err = io.ReadFull(rTcpConn, buf[0:3])
 	if err != nil {
 		logger.Warningf("[udp] sock5 connect response failed, err: %v", err)
 		return err
 	}
-	logger.Debugf("[udp] sock5 response successfully, buf: %v", buf)
 	if buf[0] != 5 || buf[1] != 0 {
 		logger.Warningf("[udp] sock5 connect response failed, version: %v, code: %v", buf[0], buf[1])
 		return fmt.Errorf("[udp] incorrect sock5 connect reponse, version: %v, code: %v", buf[0], buf[1])
 	}
-	// dial rTcpConn udp server
-	udpServer := net.UDPAddr{
-		IP:   buf[4:8],
-		Port: int(binary.BigEndian.Uint16(buf[8:10])),
+
+	// ATYPE
+	_, err = io.ReadFull(rTcpConn, buf[0:1])
+	if err != nil {
+		logger.Warningf("[%s] connect response failed, err: %v", handler.typ, err)
+		return err
 	}
+
+	// IP
+	var addrLen int
+	isDomainname := false
+	switch buf[0] {
+	case 1:
+		addrLen = 4
+	case 4:
+		addrLen = 16
+	case 3:
+		_, err = io.ReadFull(rTcpConn, buf[0:1])
+		if err != nil {
+			logger.Warningf("[%s] connect response failed, err: %v", handler.typ, err)
+			return err
+		}
+		isDomainname = true
+		addrLen = int(buf[0])
+	default:
+		return errors.New("invalid ip")
+	}
+
+	ip = make([]byte, addrLen)
+	_, err = io.ReadFull(rTcpConn, ip)
+	if err != nil {
+		logger.Warningf("[%s] connect response failed, err: %v", handler.typ, err)
+		return err
+	}
+
+	// PORT
+	_, err = io.ReadFull(rTcpConn, buf[0:2])
+	if err != nil {
+		logger.Warningf("[%s] connect response failed, err: %v", handler.typ, err)
+		return err
+	}
+	port = binary.BigEndian.Uint16(buf[0:2])
+
+	var udpServer *net.UDPAddr
+	if isDomainname {
+		udpServer, err = net.ResolveUDPAddr("udp",
+			net.JoinHostPort(string(ip), strconv.Itoa(int(port))))
+		if err != nil {
+			return err
+		}
+	} else {
+		udpServer = &net.UDPAddr{
+			IP:   ip,
+			Port: int(port),
+		}
+	}
+
+	// dial rTcpConn udp server
 	udpConn, err := net.Dial("udp", udpServer.String())
 	if err != nil {
 		logger.Warningf("[udp] dial rTcpConn udp failed, err: %v", err)

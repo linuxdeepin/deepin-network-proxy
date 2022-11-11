@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package TProxy
 
 import (
@@ -8,10 +12,9 @@ import (
 	"net/http"
 	"net/url"
 
-	config "github.com/ArisAachen/deepin-network-proxy/config"
-	define "github.com/ArisAachen/deepin-network-proxy/define"
+	config "github.com/linuxdeepin/deepin-network-proxy/config"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
 )
-
 
 // not use now
 // write for env proxy
@@ -62,8 +65,7 @@ func (handler *HttpHandlerEProxy) Tunnel() error {
 		URL: &url.URL{
 			Host: lReq.Host,
 		},
-		Header: http.Header{
-		},
+		Header: http.Header{},
 	}
 	// check if need auth
 	if auth.user != "" && auth.password != "" {

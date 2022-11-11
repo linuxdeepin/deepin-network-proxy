@@ -1,8 +1,12 @@
+// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package DBus
 
 import (
-	define "github.com/ArisAachen/deepin-network-proxy/define"
 	"github.com/godbus/dbus"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
 )
 
 // scope

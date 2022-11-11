@@ -1,8 +1,13 @@
+// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package DBus
 
 import (
-	route "github.com/ArisAachen/deepin-network-proxy/ip_route"
 	"strconv"
+
+	route "github.com/linuxdeepin/deepin-network-proxy/ip_route"
 )
 
 // create ip rule

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package DBus
 
 import (
@@ -7,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	config "github.com/ArisAachen/deepin-network-proxy/config"
+	config "github.com/linuxdeepin/deepin-network-proxy/config"
 	"github.com/linuxdeepin/go-lib/appinfo/desktopappinfo"
 )
 

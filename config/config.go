@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package Config
 
 import (
@@ -6,8 +10,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	Com "github.com/ArisAachen/deepin-network-proxy/com"
-	define "github.com/ArisAachen/deepin-network-proxy/define"
+	Com "github.com/linuxdeepin/deepin-network-proxy/com"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
 	"gopkg.in/yaml.v2"
 )
 

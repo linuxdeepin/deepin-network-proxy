@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package NewIptables
 
 import (
@@ -7,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	com "github.com/ArisAachen/deepin-network-proxy/com"
+	com "github.com/linuxdeepin/deepin-network-proxy/com"
 )
 
 // tables

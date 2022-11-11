@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package TProxy
 
 import (
@@ -8,8 +12,8 @@ import (
 	"net/http"
 	"net/url"
 
-	config "github.com/ArisAachen/deepin-network-proxy/config"
-	define "github.com/ArisAachen/deepin-network-proxy/define"
+	config "github.com/linuxdeepin/deepin-network-proxy/config"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
 )
 
 // tcp handler create handle bind lConn conn and rConn conn

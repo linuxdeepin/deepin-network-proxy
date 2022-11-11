@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package DBus
 
 import (
@@ -5,14 +9,14 @@ import (
 	"path/filepath"
 	"sync"
 
-	com "github.com/ArisAachen/deepin-network-proxy/com"
+	com "github.com/linuxdeepin/deepin-network-proxy/com"
 	"github.com/linuxdeepin/go-lib/log"
 
-	config "github.com/ArisAachen/deepin-network-proxy/config"
-	define "github.com/ArisAachen/deepin-network-proxy/define"
-	route "github.com/ArisAachen/deepin-network-proxy/ip_route"
-	newCGroups "github.com/ArisAachen/deepin-network-proxy/new_cgroups"
-	newIptables "github.com/ArisAachen/deepin-network-proxy/new_iptables"
+	config "github.com/linuxdeepin/deepin-network-proxy/config"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
+	route "github.com/linuxdeepin/deepin-network-proxy/ip_route"
+	newCGroups "github.com/linuxdeepin/deepin-network-proxy/new_cgroups"
+	newIptables "github.com/linuxdeepin/deepin-network-proxy/new_iptables"
 	"github.com/linuxdeepin/go-lib/dbusutil"
 )
 

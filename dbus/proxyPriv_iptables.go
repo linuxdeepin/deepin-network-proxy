@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package DBus
 
 import (
@@ -5,8 +9,8 @@ import (
 	"fmt"
 	"strconv"
 
-	define "github.com/ArisAachen/deepin-network-proxy/define"
-	newIptables "github.com/ArisAachen/deepin-network-proxy/new_iptables"
+	define "github.com/linuxdeepin/deepin-network-proxy/define"
+	newIptables "github.com/linuxdeepin/deepin-network-proxy/new_iptables"
 )
 
 // create tables
