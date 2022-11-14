@@ -7,7 +7,7 @@ import (
 
 	com "github.com/ArisAachen/deepin-network-proxy/com"
 	define "github.com/ArisAachen/deepin-network-proxy/define"
-	netlink "github.com/linuxdeepin/go-dbus-factory/com.deepin.system.procs"
+	netlink "github.com/linuxdeepin/go-dbus-factory/system/org.deepin.dde.procs1"
 )
 
 // cgroup2 main path

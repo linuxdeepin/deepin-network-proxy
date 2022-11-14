@@ -20,7 +20,7 @@ import (
 	"syscall"
 
 	"github.com/godbus/dbus"
-	polkit "github.com/linuxdeepin/go-dbus-factory/org.freedesktop.policykit1"
+	polkit "github.com/linuxdeepin/go-dbus-factory/system/org.freedesktop.policykit1"
 	"golang.org/x/sys/unix"
 )
 

@@ -1,4 +1,4 @@
 [D-BUS Service]
-Name=com.deepin.system.proxy
+Name=org.deepin.dde.NetworkProxy1
 Exec=/usr/lib/deepin-daemon/dde-proxy
 User=root
