@@ -7,8 +7,10 @@ package DBus
 import (
 	"fmt"
 	"net"
+	"net/netip"
 	"strings"
 
+	"github.com/linuxdeepin/deepin-network-proxy/fakeip"
 	"github.com/miekg/dns"
 )
 
@@ -16,17 +18,13 @@ type proxyDNS struct {
 	prv    *proxyPrv
 	server *dns.Server
 
-	fIP   fakeIP
-	cache *fakeIPCache
+	pool *fakeip.Pool
 }
 
 func newProxyDNS(prv *proxyPrv) *proxyDNS {
 	p := &proxyDNS{
 		prv: prv,
 	}
-
-	p.fIP = newFakeIP(net.IP{192, 168, 135, 0}, 24)
-	p.cache = newFakeIPCache()
 
 	p.server = &dns.Server{
 		Net:     "udp",
@@ -36,23 +34,16 @@ func newProxyDNS(prv *proxyPrv) *proxyDNS {
 	return p
 }
 
-func (p *proxyDNS) resolveDomain(domain string) net.IP {
+func (p *proxyDNS) resolveDomain(domain string) netip.Addr {
 	domain = strings.TrimRight(domain, ".")
 
-	i, ok := p.cache.GetByDomain(domain)
-	if ok {
-		return i
-	}
-
-	ip := p.fIP.new()
-	logger.Debugf("Query A for %s: %s", domain, ip)
-	p.cache.Add(domain, ip)
-
-	return ip
+	return p.pool.GetIP(domain)
 }
 
 func (p *proxyDNS) getDomainFromFakeIP(ip net.IP) (string, bool) {
-	return p.cache.GetByIP(ip)
+	addr, _ := netip.AddrFromSlice(ip)
+
+	return p.pool.GetDomain(addr)
 }
 
 func (p *proxyDNS) parseQuery(m *dns.Msg) {
@@ -66,6 +57,9 @@ func (p *proxyDNS) parseQuery(m *dns.Msg) {
 			}
 		case dns.TypeAAAA:
 			logger.Debugf("Query AAAA for %s", q.Name)
+			m.Answer = []dns.RR{}
+			m.Authoritative = true
+			m.RecursionAvailable = true
 		}
 	}
 }
@@ -87,9 +81,20 @@ func (p *proxyDNS) startDNSProxy() error {
 	p.server.Addr = fmt.Sprintf("127.0.0.1:%d", p.prv.Proxies.DNSPort)
 	logger.Info("dns listen addr:", p.server.Addr)
 
+	if p.pool == nil {
+		v := p.prv.Proxies.FakeIPRange
+		if v == "" {
+			v = "192.168.0.0/20"
+		}
+		logger.Info("fake ip range: ", v)
+		prefix := netip.MustParsePrefix(v)
+		p.pool, _ = fakeip.NewPool(&prefix, fakeip.CacheMaxSize)
+	}
+
 	return p.server.ListenAndServe()
 }
 
 func (p *proxyDNS) stopDNSProxy() error {
+	p.pool.Clear()
 	return p.server.Shutdown()
 }

@@ -119,7 +119,8 @@ type ScopeProxies struct {
 	TPort     int      `yaml:"t-port"`
 	DNSPort   int      `yaml:"dns-port"`
 
-	UseFakeIP bool `yaml:"use-fake-ip"`
+	UseFakeIP   bool   `yaml:"use-fake-ip"`
+	FakeIPRange string `yaml:"fake-ip-range"`
 }
 
 func (p *ScopeProxies) GetProxy(proto string, name string) (Proxy, error) {

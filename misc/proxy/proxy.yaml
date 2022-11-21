@@ -49,6 +49,7 @@ all-proxies:
     - si.com
     t-port: 8090
     use-fake-ip: true
+    fake-ip-range: 192.168.0.0/20
     dns-port: 5353
   Global:
     proxies:
@@ -100,4 +101,5 @@ all-proxies:
     - si.com
     t-port: 8080
     use-fake-ip: true
+    fake-ip-range: 192.168.0.0/20
     dns-port: 5253
