@@ -249,6 +249,48 @@ func (mgr *proxyPrv) releaseRule() error {
 		logger.Warningf("[%s] delete rule failed, err: %v", mgr.scope, err)
 		return err
 	}
+
+	if mgr.Proxies.DNSPort != 0 {
+		chain := mgr.manager.iptablesMgr.GetChain("nat", "OUTPUT")
+		if chain == nil {
+			logger.Warningf("[%s] has no nat OUTPUT chain", mgr.scope)
+			return errors.New("has no nat OUTPUT chain")
+		}
+		cpl := &newIptables.CompleteRule{
+			Action: newIptables.REDIRECT,
+			BaseSl: []newIptables.BaseRule{
+				{
+					Match: "p",
+					Param: "udp",
+				},
+				{
+					Match: "-dport",
+					Param: "53",
+				},
+				{
+					Match: "-to-ports",
+					Param: strconv.Itoa(mgr.Proxies.DNSPort),
+				},
+			},
+			ExtendsSl: []newIptables.ExtendsRule{
+				{
+					Match: "m",
+					Elem: newIptables.ExtendsElem{
+						Match: "cgroup",
+						Base: newIptables.BaseRule{
+							Not:   mgr.scope == define.Global,
+							Match: "path",
+							Param: mgr.controller.GetName()},
+					},
+				},
+			},
+		}
+
+		err := chain.DelRule(cpl)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
