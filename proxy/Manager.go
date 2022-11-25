@@ -2,21 +2,21 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package DBus
+package proxy
 
 import (
 	"os"
 	"path/filepath"
 	"sync"
 
-	com "github.com/linuxdeepin/deepin-network-proxy/com"
+	"github.com/linuxdeepin/deepin-network-proxy/com"
 	"github.com/linuxdeepin/go-lib/log"
 
-	config "github.com/linuxdeepin/deepin-network-proxy/config"
-	define "github.com/linuxdeepin/deepin-network-proxy/define"
-	route "github.com/linuxdeepin/deepin-network-proxy/ip_route"
-	newCGroups "github.com/linuxdeepin/deepin-network-proxy/new_cgroups"
-	newIptables "github.com/linuxdeepin/deepin-network-proxy/new_iptables"
+	"github.com/linuxdeepin/deepin-network-proxy/cgroups"
+	"github.com/linuxdeepin/deepin-network-proxy/config"
+	"github.com/linuxdeepin/deepin-network-proxy/define"
+	"github.com/linuxdeepin/deepin-network-proxy/iproute"
+	"github.com/linuxdeepin/deepin-network-proxy/iptables"
 	"github.com/linuxdeepin/go-lib/dbusutil"
 )
 
@@ -33,19 +33,19 @@ type Manager struct {
 	handler []BaseProxy
 
 	// cgroup manager
-	mainController *newCGroups.Controller
-	controllerMgr  *newCGroups.Manager
+	mainController *cgroups.Controller
+	controllerMgr  *cgroups.Manager
 
 	// config
 	config *config.ProxyConfig
 
 	// iptables manager
-	mainChain   *newIptables.Chain // main attach chain
-	iptablesMgr *newIptables.Manager
+	mainChain   *iptables.Chain // main attach chain
+	iptablesMgr *iptables.Manager
 
-	// route manager
-	mainRoute *route.Route
-	routeMgr  *route.Manager
+	// iproute manager
+	mainRoute *iproute.Route
+	routeMgr  *iproute.Manager
 
 	// if current listening
 	runOnce *sync.Once
@@ -168,7 +168,7 @@ func (m *Manager) Start() {
 		// iptables init
 		_ = m.initIptables()
 
-		// init route
+		// init iproute
 		_ = m.initRoute()
 	})
 }
@@ -176,29 +176,29 @@ func (m *Manager) Start() {
 // init iptables
 func (m *Manager) initIptables() error {
 	var err error
-	m.iptablesMgr = newIptables.NewManager()
+	m.iptablesMgr = iptables.NewManager()
 	m.iptablesMgr.Init()
 	// get mangle output chain
 	outputChain := m.iptablesMgr.GetChain("mangle", "OUTPUT")
 	// create main chain to manager all children chain
 	// sudo iptables -t mangle -N Main
 	// sudo iptables -t mangle -A OUTPUT -j Main
-	m.mainChain, err = outputChain.CreateChild(define.Main.String(), 0, &newIptables.CompleteRule{Action: define.Main.String()})
+	m.mainChain, err = outputChain.CreateChild(define.Main.String(), 0, &iptables.CompleteRule{Action: define.Main.String()})
 	if err != nil {
 		logger.Warningf("init iptables failed, err: %v", err)
 		return err
 	}
 	// dont proxy local lo
 	// sudo iptables -t mangle -A Main 1 -o lo -j RETURN
-	base := newIptables.BaseRule{
+	base := iptables.BaseRule{
 		// -o
 		Match: "o",
 		// "lo"
 		Param: "lo",
 	}
-	cpl := &newIptables.CompleteRule{
-		Action:    newIptables.RETURN,
-		BaseSl:    []newIptables.BaseRule{base},
+	cpl := &iptables.CompleteRule{
+		Action:    iptables.RETURN,
+		BaseSl:    []iptables.BaseRule{base},
 		ExtendsSl: nil,
 	}
 	// append rule
@@ -210,26 +210,26 @@ func (m *Manager) initIptables() error {
 
 	// mainChain add default rule
 	// iptables -t mangle -A Main -m cgroup --path main.slice -j RETURN
-	extends := newIptables.ExtendsRule{
+	extends := iptables.ExtendsRule{
 		// -m
 		Match: "m",
 		// cgroup --path main.slice
-		Elem: newIptables.ExtendsElem{
+		Elem: iptables.ExtendsElem{
 			// cgroup
 			Match: "cgroup",
 			// --path main.slice
-			Base: newIptables.BaseRule{
+			Base: iptables.BaseRule{
 				Match: "path", Param: define.Main.String() + ".slice",
 			},
 		},
 	}
 	// one complete rule
-	cpl = &newIptables.CompleteRule{
+	cpl = &iptables.CompleteRule{
 		// -j RETURN
-		Action: newIptables.RETURN,
+		Action: iptables.RETURN,
 		BaseSl: nil,
 		// -m cgroup --path main.slice -j RETURN
-		ExtendsSl: []newIptables.ExtendsRule{extends},
+		ExtendsSl: []iptables.ExtendsRule{extends},
 	}
 	// append rule
 	err = m.mainChain.AppendRule(cpl)
@@ -243,7 +243,7 @@ func (m *Manager) initIptables() error {
 
 // init cgroups
 func (m *Manager) initCGroups() error {
-	m.controllerMgr = newCGroups.NewManager()
+	m.controllerMgr = cgroups.NewManager()
 	// create controller
 	var err error
 	m.mainController, err = m.controllerMgr.CreatePriorityController(define.Main, 0, 0, define.MainPriority)
@@ -255,28 +255,28 @@ func (m *Manager) initCGroups() error {
 	return nil
 }
 
-// init route
+// init iproute
 func (m *Manager) initRoute() error {
 	var err error
-	m.routeMgr = route.NewManager()
-	node := route.RouteNodeSpec{
+	m.routeMgr = iproute.NewManager()
+	node := iproute.RouteNodeSpec{
 		Type:   "local",
 		Prefix: "default",
 	}
-	info := route.RouteInfoSpec{
+	info := iproute.RouteInfoSpec{
 		Dev: "lo",
 	}
 	m.mainRoute, err = m.routeMgr.CreateRoute("100", node, info)
 	if err != nil {
-		logger.Warningf("init route failed, err: %v", err)
+		logger.Warningf("init iproute failed, err: %v", err)
 		return err
 	}
-	logger.Debug("init route success")
+	logger.Debug("init iproute success")
 	return nil
 }
 
 // format current procs
-func (m *Manager) GetAllProcs() (map[string]newCGroups.ControlProcSl, error) {
+func (m *Manager) GetAllProcs() (map[string]cgroups.ControlProcSl, error) {
 	// check service
 	//if m.procsService == nil {
 	//	logger.Warning("[manager] get procs failed, service not init")
@@ -290,13 +290,13 @@ func (m *Manager) GetAllProcs() (map[string]newCGroups.ControlProcSl, error) {
 	//	return nil, err
 	//}
 	// map[exec][pid exec cgroups]
-	//ctrlProcMap := make(map[string]newCGroups.ControlProcSl)
+	//ctrlProcMap := make(map[string]cgroups .ControlProcSl)
 	//for _, proc := range procs {
 	//	execPath := proc.ExecPath
 	//	ctrlProcSl, ok := ctrlProcMap[execPath]
 	//	// if not exist, add one
 	//	if !ok {
-	//		ctrlProcSl = newCGroups.ControlProcSl{}
+	//		ctrlProcSl = cgroups .ControlProcSl{}
 	//		// ctrlProcMap[execPath] = ctrlProcSl
 	//	}
 	//	// append
@@ -402,10 +402,10 @@ func (m *Manager) release() error {
 	//}
 	//m.controllerMgr = nil
 
-	// remove all route
+	// remove all iproute
 	err = m.mainRoute.Remove()
 	if err != nil {
-		logger.Warning("[manager] remove all route failed, err:", err)
+		logger.Warning("[manager] remove all iproute failed, err:", err)
 		return err
 	}
 	m.routeMgr = nil

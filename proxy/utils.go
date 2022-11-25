@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package DBus
+package proxy
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	config "github.com/linuxdeepin/deepin-network-proxy/config"
+	"github.com/linuxdeepin/deepin-network-proxy/config"
 	"github.com/linuxdeepin/go-lib/appinfo/desktopappinfo"
 )
 

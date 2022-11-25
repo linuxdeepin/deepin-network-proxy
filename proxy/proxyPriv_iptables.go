@@ -2,15 +2,15 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package DBus
+package proxy
 
 import (
 	"errors"
 	"fmt"
 	"strconv"
 
-	define "github.com/linuxdeepin/deepin-network-proxy/define"
-	newIptables "github.com/linuxdeepin/deepin-network-proxy/new_iptables"
+	"github.com/linuxdeepin/deepin-network-proxy/define"
+	"github.com/linuxdeepin/deepin-network-proxy/iptables"
 )
 
 // create tables
@@ -42,23 +42,23 @@ func (mgr *proxyPrv) createTable() error {
 
 	// command line
 	// iptables -t mangle -I main $1 -p tcp -m cgroup --path app.slice/global.slice -j app/global
-	cpl := &newIptables.CompleteRule{
+	cpl := &iptables.CompleteRule{
 		// -j app/global
 		Action: mgr.scope.String(),
 		// base rules slice         -p tcp
-		BaseSl: []newIptables.BaseRule{
+		BaseSl: []iptables.BaseRule{
 			{
 				Match: "p",
 				Param: "tcp",
 			},
 		},
 		// extends rules slice       -m cgroup --path app.slice/global.slice
-		ExtendsSl: []newIptables.ExtendsRule{
+		ExtendsSl: []iptables.ExtendsRule{
 			{
 				Match: "m",
-				Elem: newIptables.ExtendsElem{
+				Elem: iptables.ExtendsElem{
 					Match: "cgroup",
-					Base:  newIptables.BaseRule{Not: mark, Match: "path", Param: mgr.controller.GetName()},
+					Base:  iptables.BaseRule{Not: mark, Match: "path", Param: mgr.controller.GetName()},
 				},
 			},
 		},
@@ -78,9 +78,9 @@ func (mgr *proxyPrv) createTable() error {
 			logger.Warningf("[%s] has no nat OUTPUT chain", mgr.scope)
 			return errors.New("has no nat OUTPUT chain")
 		}
-		cpl := &newIptables.CompleteRule{
-			Action: newIptables.REDIRECT,
-			BaseSl: []newIptables.BaseRule{
+		cpl := &iptables.CompleteRule{
+			Action: iptables.REDIRECT,
+			BaseSl: []iptables.BaseRule{
 				{
 					Match: "p",
 					Param: "udp",
@@ -94,12 +94,12 @@ func (mgr *proxyPrv) createTable() error {
 					Param: strconv.Itoa(mgr.Proxies.DNSPort),
 				},
 			},
-			ExtendsSl: []newIptables.ExtendsRule{
+			ExtendsSl: []iptables.ExtendsRule{
 				{
 					Match: "m",
-					Elem: newIptables.ExtendsElem{
+					Elem: iptables.ExtendsElem{
 						Match: "cgroup",
-						Base:  newIptables.BaseRule{Not: mark, Match: "path", Param: mgr.controller.GetName()},
+						Base:  iptables.BaseRule{Not: mark, Match: "path", Param: mgr.controller.GetName()},
 					},
 				},
 			},
@@ -123,16 +123,16 @@ func (mgr *proxyPrv) appendRule() error {
 		return errors.New("chain is nil")
 	}
 	// iptables -t mangle -A App_Proxy -j MARK --set-mark $2
-	base := newIptables.BaseRule{
+	base := iptables.BaseRule{
 		Match: "-set-mark",
 		Param: strconv.Itoa(mgr.Proxies.TPort),
 	}
 	// one complete rule
-	cpl := &newIptables.CompleteRule{
+	cpl := &iptables.CompleteRule{
 		// -j MARK
-		Action: newIptables.MARK,
+		Action: iptables.MARK,
 		// --set-mark $2
-		BaseSl: []newIptables.BaseRule{base},
+		BaseSl: []iptables.BaseRule{base},
 	}
 	// append
 	err := selfChain.AppendRule(cpl)
@@ -147,39 +147,39 @@ func (mgr *proxyPrv) appendRule() error {
 		return errors.New("chain is nil")
 	}
 	// iptables -t mangle -A PREROUTING -j TPROXY -m mark --mark $2 --on-port 8080
-	protoExtends := newIptables.ExtendsRule{
+	protoExtends := iptables.ExtendsRule{
 		// -m
 		Match: "p",
 		// mark --mark $2
-		Elem: newIptables.ExtendsElem{
+		Elem: iptables.ExtendsElem{
 			// mark
 			Match: "tcp",
 			// --mark $2
-			Base: newIptables.BaseRule{
+			Base: iptables.BaseRule{
 				Match: "on-port", Param: strconv.Itoa(mgr.Proxies.TPort),
 			},
 		},
 	}
-	markExtends := newIptables.ExtendsRule{
+	markExtends := iptables.ExtendsRule{
 		// -m
 		Match: "m",
 		// mark --mark $2
-		Elem: newIptables.ExtendsElem{
+		Elem: iptables.ExtendsElem{
 			// mark
 			Match: "mark",
 			// --mark $2
-			Base: newIptables.BaseRule{
+			Base: iptables.BaseRule{
 				Match: "mark", Param: strconv.Itoa(mgr.Proxies.TPort),
 			},
 		},
 	}
 	// one complete rule
-	cpl = &newIptables.CompleteRule{
+	cpl = &iptables.CompleteRule{
 		// -j TPROXY
-		Action: newIptables.TPROXY,
+		Action: iptables.TPROXY,
 		BaseSl: nil,
 		// -m mark --mark $2
-		ExtendsSl: []newIptables.ExtendsRule{protoExtends, markExtends},
+		ExtendsSl: []iptables.ExtendsRule{protoExtends, markExtends},
 	}
 	// append
 	err = defChain.AppendRule(cpl)
@@ -210,39 +210,39 @@ func (mgr *proxyPrv) releaseRule() error {
 		return fmt.Errorf("[%s] default chain is nil", mgr.scope)
 	}
 	// iptables -t mangle -D PREROUTING -j TPROXY -m mark --mark $2 --on-port 8080
-	protoExtends := newIptables.ExtendsRule{
+	protoExtends := iptables.ExtendsRule{
 		// -m
 		Match: "p",
 		// mark --mark $2
-		Elem: newIptables.ExtendsElem{
+		Elem: iptables.ExtendsElem{
 			// mark
 			Match: "tcp",
 			// --mark $2
-			Base: newIptables.BaseRule{
+			Base: iptables.BaseRule{
 				Match: "on-port", Param: strconv.Itoa(mgr.Proxies.TPort),
 			},
 		},
 	}
-	markExtends := newIptables.ExtendsRule{
+	markExtends := iptables.ExtendsRule{
 		// -m
 		Match: "m",
 		// mark --mark $2
-		Elem: newIptables.ExtendsElem{
+		Elem: iptables.ExtendsElem{
 			// mark
 			Match: "mark",
 			// --mark $2
-			Base: newIptables.BaseRule{
+			Base: iptables.BaseRule{
 				Match: "mark", Param: strconv.Itoa(mgr.Proxies.TPort),
 			},
 		},
 	}
 	// one complete rule
-	cpl := &newIptables.CompleteRule{
+	cpl := &iptables.CompleteRule{
 		// -j TPROXY
-		Action: newIptables.TPROXY,
+		Action: iptables.TPROXY,
 		BaseSl: nil,
 		// -m mark --mark $2
-		ExtendsSl: []newIptables.ExtendsRule{protoExtends, markExtends},
+		ExtendsSl: []iptables.ExtendsRule{protoExtends, markExtends},
 	}
 	err = defChain.DelRule(cpl)
 	if err != nil {

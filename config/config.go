@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package Config
+package config
 
 import (
 	"errors"
@@ -10,8 +10,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	Com "github.com/linuxdeepin/deepin-network-proxy/com"
-	define "github.com/linuxdeepin/deepin-network-proxy/define"
+	"github.com/linuxdeepin/deepin-network-proxy/com"
+	"github.com/linuxdeepin/deepin-network-proxy/define"
 	"gopkg.in/yaml.v2"
 )
 
@@ -200,7 +200,7 @@ func (p *ProxyConfig) WritePxyCfg(path string) error {
 		return err
 	}
 	// guarantee file dir is exist
-	err = Com.GuaranteeDir(filepath.Dir(path))
+	err = com.GuaranteeDir(filepath.Dir(path))
 	if err != nil {
 		return err
 	}

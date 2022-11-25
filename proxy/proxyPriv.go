@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package DBus
+package proxy
 
 import (
 	"errors"
@@ -12,13 +12,13 @@ import (
 	"strconv"
 
 	"github.com/godbus/dbus"
-	com "github.com/linuxdeepin/deepin-network-proxy/com"
-	config "github.com/linuxdeepin/deepin-network-proxy/config"
-	define "github.com/linuxdeepin/deepin-network-proxy/define"
-	IpRoute "github.com/linuxdeepin/deepin-network-proxy/ip_route"
-	newCGroups "github.com/linuxdeepin/deepin-network-proxy/new_cgroups"
-	newIptables "github.com/linuxdeepin/deepin-network-proxy/new_iptables"
-	tProxy "github.com/linuxdeepin/deepin-network-proxy/tproxy"
+	"github.com/linuxdeepin/deepin-network-proxy/cgroups"
+	"github.com/linuxdeepin/deepin-network-proxy/com"
+	"github.com/linuxdeepin/deepin-network-proxy/config"
+	"github.com/linuxdeepin/deepin-network-proxy/define"
+	"github.com/linuxdeepin/deepin-network-proxy/iproute"
+	"github.com/linuxdeepin/deepin-network-proxy/iptables"
+	"github.com/linuxdeepin/deepin-network-proxy/tproxy"
 	"github.com/linuxdeepin/go-lib/dbusutil"
 	"github.com/linuxdeepin/go-lib/log"
 )
@@ -56,16 +56,16 @@ type proxyPrv struct {
 	udpHandler net.PacketConn
 
 	// cgroup controller
-	controller *newCGroups.Controller
+	controller *cgroups.Controller
 
 	// iptables chain rule slice[3]
-	chains [2]*newIptables.Chain
+	chains [2]*iptables.Chain
 
 	// route rule
-	ipRule *IpRoute.Rule
+	ipRule *iproute.Rule
 
 	// handler manager
-	handlerMgr *tProxy.HandlerMgr
+	handlerMgr *tproxy.HandlerMgr
 
 	dnsProxy *proxyDNS
 
@@ -82,7 +82,7 @@ func initProxyPrv(scope define.Scope, priority define.Priority) *proxyPrv {
 	prv := &proxyPrv{
 		scope:      scope,
 		priority:   priority,
-		handlerMgr: tProxy.NewHandlerMgr(scope),
+		handlerMgr: tproxy.NewHandlerMgr(scope),
 		// stop:       true,
 		Proxies: config.ScopeProxies{
 			Proxies:      make(map[string][]config.Proxy),
@@ -237,7 +237,7 @@ func (mgr *proxyPrv) AddProc(pid int32) *dbus.Error {
 		return dbusutil.ToError(errors.New("controller not exist"))
 	}
 	// attach pid
-	err := newCGroups.Attach(strconv.Itoa(int(pid)), mgr.controller.GetControlPath())
+	err := cgroups.Attach(strconv.Itoa(int(pid)), mgr.controller.GetControlPath())
 	if err != nil {
 		logger.Debugf("attach %d to %s failed, err: %v", pid, mgr.controller.GetControlPath(), err)
 		return dbusutil.ToError(err)

@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package NewCGroups
+package cgroups
 
 import (
 	"errors"
 	"os/exec"
 	"strings"
 
-	com "github.com/linuxdeepin/deepin-network-proxy/com"
+	"github.com/linuxdeepin/deepin-network-proxy/com"
 )
 
 // Attach pid to cgroups path

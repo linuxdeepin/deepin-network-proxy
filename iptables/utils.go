@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package NewIptables
+package iptables
 
 func upIptablesCap() error {
 	//linkPath, err := exec.LookPath("iptables")

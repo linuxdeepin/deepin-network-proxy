@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package NewCGroups
+package cgroups
 
 import (
 	"errors"
 	"sort"
 
-	com "github.com/linuxdeepin/deepin-network-proxy/com"
-	define "github.com/linuxdeepin/deepin-network-proxy/define"
+	"github.com/linuxdeepin/deepin-network-proxy/com"
+	"github.com/linuxdeepin/deepin-network-proxy/define"
 	"github.com/linuxdeepin/go-lib/log"
 )
 
@@ -53,10 +53,7 @@ func (m *Manager) CreatePriorityController(name define.Scope, uid int, gid int, 
 	m.controllers = append(m.controllers, controller)
 	sort.SliceStable(m.controllers, func(i, j int) bool {
 		// sort by priority
-		if m.controllers[i].Priority > m.controllers[j].Priority {
-			return false
-		}
-		return true
+		return m.controllers[i].Priority <= m.controllers[j].Priority
 	})
 	return controller, nil
 }

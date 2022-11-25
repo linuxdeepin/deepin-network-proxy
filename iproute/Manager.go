@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package IpRoute
+package iproute
 
 import "github.com/linuxdeepin/go-lib/log"
 

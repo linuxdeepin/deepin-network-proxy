@@ -2,52 +2,52 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package Config
+package config
 
 import (
 	"log"
 	"testing"
 
-	"github.com/ArisAachen/deepin-network-proxy/com"
+	"github.com/linuxdeepin/deepin-network-proxy/com"
 )
 
 func TestProxyConfig_LoadPxyCfg(t *testing.T) {
 	http := []Proxy{
 		// http proxy
 		{
-			ProtoType:      "http",
-			Name:           "http_1",
-			Server:         "10.20.31.132",
-			Port:           808,
-			UserName:       "uos",
-			Password:       "12345678",
+			ProtoType: "http",
+			Name:      "http_1",
+			Server:    "10.20.31.132",
+			Port:      808,
+			UserName:  "uos",
+			Password:  "12345678",
 		},
 		{
-			ProtoType:      "http",
-			Name:           "http_2",
-			Server:         "10.20.31.132",
-			Port:           80,
-			UserName:       "uos",
-			Password:       "12345678",
+			ProtoType: "http",
+			Name:      "http_2",
+			Server:    "10.20.31.132",
+			Port:      80,
+			UserName:  "uos",
+			Password:  "12345678",
 		},
 	}
 	sock4 := []Proxy{
 		// http proxy
 		{
-			ProtoType:      "sock4",
-			Name:           "sock4_1",
-			Server:         "10.20.31.132",
-			Port:           1080,
-			UserName:       "uos",
-			Password:       "12345678",
+			ProtoType: "sock4",
+			Name:      "sock4_1",
+			Server:    "10.20.31.132",
+			Port:      1080,
+			UserName:  "uos",
+			Password:  "12345678",
 		},
 		{
-			ProtoType:      "sock4",
-			Name:           "sock4_2",
-			Server:         "10.20.31.132",
-			Port:           1080,
-			UserName:       "uos",
-			Password:       "12345678",
+			ProtoType: "sock4",
+			Name:      "sock4_2",
+			Server:    "10.20.31.132",
+			Port:      1080,
+			UserName:  "uos",
+			Password:  "12345678",
 		},
 	}
 	sock5 := []Proxy{
@@ -72,7 +72,7 @@ func TestProxyConfig_LoadPxyCfg(t *testing.T) {
 
 	cfg := &ProxyConfig{
 		AllProxies: map[string]ScopeProxies{
-			"global": ScopeProxies{
+			"global": {
 				Proxies: map[string][]Proxy{
 					"http":  http,
 					"sock4": sock4,
@@ -97,7 +97,7 @@ func TestProxyConfig_LoadPxyCfg(t *testing.T) {
 		},
 	}
 
-	path, err := Com.GetConfigDir()
+	path, err := com.GetConfigDir()
 	if err != nil {
 		return
 	}

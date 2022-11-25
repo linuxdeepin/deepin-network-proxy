@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package DBus
+package proxy
 
 import (
 	"github.com/godbus/dbus"
-	define "github.com/linuxdeepin/deepin-network-proxy/define"
+	"github.com/linuxdeepin/deepin-network-proxy/define"
 )
 
 // scope

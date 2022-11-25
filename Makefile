@@ -17,11 +17,9 @@ export GO111MODULE=off
 all: build
 
 prepare:
-	mkdir -p bin
-	@if [ ! -d ${GOPATH_DIR}/src/$(dir ${GOPKG_PREFIX}) ];then \
-		mkdir -p ${GOPATH_DIR}/src/$(dir ${GOPKG_PREFIX}); \
-		ln -sf ../../../.. ${GOPATH_DIR}/src/${GOPKG_PREFIX}; \
-		fi
+	@mkdir -p bin
+	@mkdir -p ${GOPATH_DIR}/src/$(dir ${GOPKG_PREFIX});
+	@ln -snf ../../../.. ${GOPATH_DIR}/src/${GOPKG_PREFIX};
 
 Out/%:  prepare
 	@echo $(GOPATH)
