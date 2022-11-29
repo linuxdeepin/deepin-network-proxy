@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package Netlink
+package netlink
 
 import (
 	"errors"
@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	com "github.com/ArisAachen/deepin-network-proxy/com"
+	"github.com/linuxdeepin/deepin-network-proxy/com"
 )
 
 // get proc message

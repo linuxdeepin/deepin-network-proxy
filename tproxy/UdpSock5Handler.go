@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package TProxy
+package tproxy
 
 import (
 	"encoding/binary"
@@ -12,9 +12,9 @@ import (
 	"net"
 	"strconv"
 
-	com "github.com/linuxdeepin/deepin-network-proxy/com"
-	config "github.com/linuxdeepin/deepin-network-proxy/config"
-	define "github.com/linuxdeepin/deepin-network-proxy/define"
+	"github.com/linuxdeepin/deepin-network-proxy/com"
+	"github.com/linuxdeepin/deepin-network-proxy/config"
+	"github.com/linuxdeepin/deepin-network-proxy/define"
 )
 
 type UdpSock5Handler struct {

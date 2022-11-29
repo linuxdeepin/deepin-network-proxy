@@ -2,15 +2,15 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package NewCGroups
+package cgroups
 
 import (
 	"os"
 	"path/filepath"
 	"reflect"
 
-	com "github.com/linuxdeepin/deepin-network-proxy/com"
-	define "github.com/linuxdeepin/deepin-network-proxy/define"
+	"github.com/linuxdeepin/deepin-network-proxy/com"
+	"github.com/linuxdeepin/deepin-network-proxy/define"
 	netlink "github.com/linuxdeepin/go-dbus-factory/com.deepin.system.procs"
 )
 

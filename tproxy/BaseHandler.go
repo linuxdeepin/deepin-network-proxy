@@ -2,15 +2,15 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package TProxy
+package tproxy
 
 import (
 	"fmt"
 	"net"
 	"sync"
 
-	config "github.com/linuxdeepin/deepin-network-proxy/config"
-	define "github.com/linuxdeepin/deepin-network-proxy/define"
+	"github.com/linuxdeepin/deepin-network-proxy/config"
+	"github.com/linuxdeepin/deepin-network-proxy/define"
 	"github.com/linuxdeepin/go-lib/log"
 )
 

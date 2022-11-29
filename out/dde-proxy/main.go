@@ -5,13 +5,13 @@
 package main
 
 import (
-	proxyDBus "github.com/linuxdeepin/deepin-network-proxy/dbus"
+	"github.com/linuxdeepin/deepin-network-proxy/proxy"
 	"github.com/linuxdeepin/go-lib/log"
 )
 
 func main() {
 	logger := log.NewLogger("proxy")
-	manager := proxyDBus.NewManager()
+	manager := proxy.NewManager()
 	err := manager.Init()
 	if err != nil {
 		logger.Warningf("manager init failed, err: %v", err)

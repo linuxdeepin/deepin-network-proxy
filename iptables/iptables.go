@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package NewIptables
+package iptables
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	com "github.com/linuxdeepin/deepin-network-proxy/com"
+	"github.com/linuxdeepin/deepin-network-proxy/com"
 )
 
 // tables

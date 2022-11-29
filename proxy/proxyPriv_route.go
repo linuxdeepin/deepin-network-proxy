@@ -2,18 +2,18 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package DBus
+package proxy
 
 import (
 	"strconv"
 
-	route "github.com/linuxdeepin/deepin-network-proxy/ip_route"
+	"github.com/linuxdeepin/deepin-network-proxy/iproute"
 )
 
 // create ip rule
 func (mgr *proxyPrv) createIpRule() error {
-	action := route.RuleAction{}
-	selector := route.RuleSelector{
+	action := iproute.RuleAction{}
+	selector := iproute.RuleSelector{
 		// fwmark 8080
 		Fwmark: strconv.Itoa(mgr.Proxies.TPort),
 	}

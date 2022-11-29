@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package DBus
+package proxy
 
 import (
 	"bufio"
@@ -16,10 +16,10 @@ import (
 	"syscall"
 
 	"github.com/godbus/dbus"
-	com "github.com/linuxdeepin/deepin-network-proxy/com"
-	config "github.com/linuxdeepin/deepin-network-proxy/config"
-	newCGroups "github.com/linuxdeepin/deepin-network-proxy/new_cgroups"
-	tProxy "github.com/linuxdeepin/deepin-network-proxy/tproxy"
+	"github.com/linuxdeepin/deepin-network-proxy/cgroups"
+	"github.com/linuxdeepin/deepin-network-proxy/com"
+	"github.com/linuxdeepin/deepin-network-proxy/config"
+	"github.com/linuxdeepin/deepin-network-proxy/tproxy"
 	"github.com/linuxdeepin/go-lib/dbusutil"
 )
 
@@ -74,12 +74,12 @@ func (mgr *proxyPrv) StartProxy(sender dbus.Sender, proto string, name string, u
 	//mgr.stop = false
 	logger.Debugf("[%s] start proxy, proto [%s] name [%s] udp [%v]", mgr.scope, proto, name, udp)
 	// check if proto is legal
-	var proxyTyp tProxy.ProtoTyp
+	var proxyTyp tproxy.ProtoTyp
 	if proto == "socks5" {
 		// never err
-		proxyTyp = tProxy.SOCKS5TCP
+		proxyTyp = tproxy.SOCKS5TCP
 	} else {
-		proxyTyp, err = tProxy.BuildProto(proto)
+		proxyTyp, err = tproxy.BuildProto(proto)
 		if err != nil {
 			return dbusutil.ToError(err)
 		}
@@ -204,7 +204,7 @@ func (mgr *proxyPrv) attachBackUser() error {
 			return err
 		}
 		// attach back
-		err = newCGroups.Attach(string(buf), path)
+		err = cgroups.Attach(string(buf), path)
 		if err != nil {
 			logger.Debugf("attach pid %s back %s failed, err: %v", string(buf), path, err)
 			continue
@@ -309,7 +309,7 @@ func (mgr *proxyPrv) listenPacket() (net.PacketConn, error) {
 }
 
 // proxy tcp
-func (mgr *proxyPrv) accept(proxyTyp tProxy.ProtoTyp, proxy config.Proxy, listen net.Listener) {
+func (mgr *proxyPrv) accept(proxyTyp tproxy.ProtoTyp, proxy config.Proxy, listen net.Listener) {
 	if listen == nil {
 		logger.Warningf("[%s] tcp listener is nil", mgr.scope)
 		return
@@ -337,7 +337,7 @@ func (mgr *proxyPrv) accept(proxyTyp tProxy.ProtoTyp, proxy config.Proxy, listen
 }
 
 // read udp message
-func (mgr *proxyPrv) readMsgUDP(proxyTyp tProxy.ProtoTyp, proxy config.Proxy, listen net.PacketConn) {
+func (mgr *proxyPrv) readMsgUDP(proxyTyp tproxy.ProtoTyp, proxy config.Proxy, listen net.PacketConn) {
 	if listen == nil {
 		logger.Warningf("[%s] tcp listener is nil", mgr.scope)
 		return
@@ -383,7 +383,7 @@ func (mgr *proxyPrv) readMsgUDP(proxyTyp tProxy.ProtoTyp, proxy config.Proxy, li
 }
 
 // for t-proxy
-func (mgr *proxyPrv) proxyTcp(proxyTyp tProxy.ProtoTyp, proxy config.Proxy, lConn net.Conn) {
+func (mgr *proxyPrv) proxyTcp(proxyTyp tproxy.ProtoTyp, proxy config.Proxy, lConn net.Conn) {
 	// request is redirect by t-proxy, output -> pre-routing
 	// at that time, the actual remote addr is conn`s local addr, the actual local addr is conn`s remote addr
 	// can use conn as fake remote conn, to connect with actual local connection
@@ -395,13 +395,13 @@ func (mgr *proxyPrv) proxyTcp(proxyTyp tProxy.ProtoTyp, proxy config.Proxy, lCon
 	case *net.UDPAddr:
 		domain, ok := mgr.dnsProxy.getDomainFromFakeIP(addr.IP)
 		if ok {
-			realRAddr = tProxy.NewDomainAddr("udp", domain, addr.Port)
+			realRAddr = tproxy.NewDomainAddr("udp", domain, addr.Port)
 		}
 
 	case *net.TCPAddr:
 		domain, ok := mgr.dnsProxy.getDomainFromFakeIP(addr.IP)
 		if ok {
-			realRAddr = tProxy.NewDomainAddr("tcp", domain, addr.Port)
+			realRAddr = tproxy.NewDomainAddr("tcp", domain, addr.Port)
 		}
 	}
 
@@ -410,12 +410,12 @@ func (mgr *proxyPrv) proxyTcp(proxyTyp tProxy.ProtoTyp, proxy config.Proxy, lCon
 		"local[%s] -> remote [%s](%s)", proxyTyp, lAddr.String(), rAddr.String(), realRAddr)
 
 	// make key to mark this connection
-	key := tProxy.HandlerKey{
+	key := tproxy.HandlerKey{
 		SrcAddr: lAddr.String(),
 		DstAddr: rAddr.String(),
 	}
 	// create new handler
-	handler := tProxy.NewHandler(proxyTyp, mgr.scope, key, proxy, lAddr, realRAddr, lConn)
+	handler := tproxy.NewHandler(proxyTyp, mgr.scope, key, proxy, lAddr, realRAddr, lConn)
 	// create tunnel between proxy server and dst server
 	err := handler.Tunnel()
 	if err != nil {
@@ -437,16 +437,16 @@ func (mgr *proxyPrv) proxyUdp(proxy config.Proxy, lAddr net.Addr, rAddr net.Addr
 		return
 	}
 	// make key to mark this connection
-	key := tProxy.HandlerKey{
+	key := tproxy.HandlerKey{
 		SrcAddr: lAddr.String(),
 		DstAddr: rAddr.String(),
 	}
 	// create new handler
-	handler := tProxy.NewHandler(tProxy.SOCKS5UDP, mgr.scope, key, proxy, lAddr, rAddr, lConn)
+	handler := tproxy.NewHandler(tproxy.SOCKS5UDP, mgr.scope, key, proxy, lAddr, rAddr, lConn)
 	// create tunnel between proxy server and dst server
 	err = handler.Tunnel()
 	if err != nil {
-		logger.Warningf("[%s] create tunnel failed, err: %v", tProxy.SOCKS5UDP, err)
+		logger.Warningf("[%s] create tunnel failed, err: %v", tproxy.SOCKS5UDP, err)
 		handler.Close()
 		return
 	}

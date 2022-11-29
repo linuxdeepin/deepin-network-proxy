@@ -5,7 +5,7 @@
 package main
 
 import (
-	netlink "github.com/ArisAachen/deepin-network-proxy/netlink"
+	"github.com/linuxdeepin/deepin-network-proxy/netlink"
 )
 
 func main() {
