@@ -1,3 +1,10 @@
+deepin-proxy (2.0.1) unstable; urgency=medium
+
+  [ TagBuilder ]
+  * feat: 接口更变，增加V23接口(Task: 207483)(Influence: 接口更变)
+
+ -- zhaoyingzhen <zhaoyingzhen@uniontech.com>  Tue, 13 Dec 2022 19:29:01 +0800
+
 deepin-proxy (2.0.0.0) unstable; urgency=medium
 
   * release 2.0.0.0
