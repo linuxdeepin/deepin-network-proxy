@@ -26,8 +26,8 @@ import (
 var logger *log.Logger
 
 const (
-	BusServiceName = "com.deepin.system.proxy"
-	BusPath        = "/com/deepin/system/proxy"
+	BusServiceName = "org.deepin.dde.NetworkProxy1"
+	BusPath        = "/org/deepin/dde/NetworkProxy1"
 	BusInterface   = BusServiceName
 )
 

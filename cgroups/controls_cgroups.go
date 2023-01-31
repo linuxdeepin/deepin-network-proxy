@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"reflect"
 
-	"github.com/linuxdeepin/deepin-network-proxy/com"
-	"github.com/linuxdeepin/deepin-network-proxy/define"
-	netlink "github.com/linuxdeepin/go-dbus-factory/com.deepin.system.procs"
+	com "github.com/ArisAachen/deepin-network-proxy/com"
+	define "github.com/ArisAachen/deepin-network-proxy/define"
+	netlink "github.com/linuxdeepin/go-dbus-factory/system/org.deepin.dde.procs1"
 )
 
 // cgroup2 main path

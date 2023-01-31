@@ -1,7 +1,7 @@
 <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
          "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
 <node>
-    <interface name="com.deepin.system.procs">
+    <interface name="org.deepin.dde.Procs1">
         <signal name="ExecProc">
             <arg name="execPath" type="s"></arg>
             <arg name="cwdPath" type="s"></arg>
