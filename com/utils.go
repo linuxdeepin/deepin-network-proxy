@@ -23,7 +23,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/godbus/dbus"
+	"github.com/godbus/dbus/v5"
 	polkit "github.com/linuxdeepin/go-dbus-factory/system/org.freedesktop.policykit1"
 	"golang.org/x/sys/unix"
 )
