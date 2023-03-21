@@ -9,6 +9,7 @@ DAEMON=deepin-daemon
 GOPATH=/usr/share/gocode
 
 GOPATH_DIR=gopath
+GODEP_DIR = godep
 GOPKG_PREFIX=github.com/linuxdeepin/deepin-network-proxy
 
 GOBUILD = go build $(GO_BUILD_FLAGS)
@@ -17,13 +18,15 @@ export GO111MODULE=off
 all: build
 
 prepare:
+	@mkdir -p ${GODEP_DIR}/src/github.com/godbus/dbus/v5
+	@cp -r /usr/share/gocode/src/github.com/godbus/dbus/* ${GODEP_DIR}/src/github.com/godbus/dbus/v5
 	@mkdir -p bin
 	@mkdir -p ${GOPATH_DIR}/src/$(dir ${GOPKG_PREFIX});
 	@ln -snf ../../../.. ${GOPATH_DIR}/src/${GOPKG_PREFIX};
 
 Out/%:  prepare
 	@echo $(GOPATH)
-	GOPATH="${CURDIR}/${GOPATH_DIR}:$(GOPATH)" ${GOBUILD} -o bin/${@F} ${GOBUILD_OPTIONS} ${GOPKG_PREFIX}/out/${@F}
+	GOPATH="${CURDIR}/${GOPATH_DIR}:${CURDIR}/${GODEP_DIR}:$(GOPATH)" ${GOBUILD} -o bin/${@F} ${GOBUILD_OPTIONS} ${GOPKG_PREFIX}/out/${@F}
 
 install:
 	mkdir -p ${DESTDIR}${PREFIXETC}/${DEEPIN}/${PROXYFILE}
