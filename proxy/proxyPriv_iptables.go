@@ -58,7 +58,7 @@ func (mgr *proxyPrv) createTable() error {
 				Match: "m",
 				Elem: iptables.ExtendsElem{
 					Match: "cgroup",
-					Base:  iptables.BaseRule{Not: mark, Match: "path", Param: mgr.controller.GetName()},
+					Base:  iptables.BaseRule{Not: mark, Match: "path", Param: define.Prefix + mgr.controller.GetName()},
 				},
 			},
 		},
@@ -99,7 +99,7 @@ func (mgr *proxyPrv) createTable() error {
 					Match: "m",
 					Elem: iptables.ExtendsElem{
 						Match: "cgroup",
-						Base:  iptables.BaseRule{Not: mark, Match: "path", Param: mgr.controller.GetName()},
+						Base:  iptables.BaseRule{Not: mark, Match: "path", Param: define.Prefix + mgr.controller.GetName()},
 					},
 				},
 			},

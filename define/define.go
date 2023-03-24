@@ -17,6 +17,7 @@ const (
 	Main   Scope = "Main"
 	App    Scope = "App"
 	Global Scope = "Global"
+	Prefix       = "unified/"
 )
 
 func (s Scope) String() string {

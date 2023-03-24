@@ -219,7 +219,7 @@ func (m *Manager) initIptables() error {
 			Match: "cgroup",
 			// --path main.slice
 			Base: iptables.BaseRule{
-				Match: "path", Param: define.Main.String() + ".slice",
+				Match: "path", Param: define.Prefix + define.Main.String() + ".slice",
 			},
 		},
 	}
