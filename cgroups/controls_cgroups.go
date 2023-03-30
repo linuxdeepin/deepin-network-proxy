@@ -16,7 +16,7 @@ import (
 
 // cgroup2 main path
 const (
-	cgroup2Path = "/sys/fs/cgroup/unified"
+	cgroup2Path = "/sys/fs/cgroup"
 	suffix      = ".slice"
 	procsPath   = "cgroup.procs"
 )
