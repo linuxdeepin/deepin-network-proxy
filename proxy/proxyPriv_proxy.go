@@ -268,7 +268,13 @@ func (mgr *proxyPrv) listen() (net.Listener, error) {
 		logger.Warningf("[%s] tcp listener get file failed, err: %v", err)
 		return nil, err
 	}
-	defer file.Close()
+
+	defer func(){
+		if err := file.Close(); err != nil{
+			logger.Warningf("file close failed, err: %v", err)
+		}
+	}()
+
 	// set transparent
 	err = com.SetSockOptTrn(int(file.Fd()))
 	if err != nil {
@@ -348,7 +354,12 @@ func (mgr *proxyPrv) readMsgUDP(proxyTyp tproxy.ProtoTyp, proxy config.Proxy, li
 		logger.Warning("convert udp data failed")
 		return
 	}
-	defer conn.Close()
+
+	defer func(){
+		if err := conn.Close(); err != nil{
+			logger.Warning("close conn failed, err: %v", err)
+		}
+	}()
 
 	// start accept until stop
 	for {
