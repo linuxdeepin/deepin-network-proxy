@@ -1,3 +1,14 @@
+deepin-proxy (2.0.2) unstable; urgency=medium
+
+  * fix: fix wrong cgroup path
+  * fix: wrong import path
+  * chore(CI): add OBS workflows
+  * chore: add go mod (#20)
+  * chore: remove replace in go mod
+  * fix: catch some close error
+
+ -- Deepin Packages Builder <packages@deepin.org>  Sun, 23 Apr 2023 09:44:45 +0800
+
 deepin-proxy (2.0.1) unstable; urgency=medium
 
   [ TagBuilder ]
